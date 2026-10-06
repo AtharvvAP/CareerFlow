@@ -1,0 +1,15 @@
+
+### Add a job application
+POST http://localhost:8080/api/applications
+Content-Type: application/json
+
+{
+  "company": "TCS",
+  "role": "Java Developer",
+  "status": "Applied",
+  "date": "2026-10-03",
+  "notes": "Applied through LinkedIn"
+}
+
+### Get all job applications
+GET http://localhost:8080/api/applications

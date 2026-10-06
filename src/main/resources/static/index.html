@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JobTrack Application Manager</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f4f7fb;
+        color: #18243a;
+    }
+
+    header {
+        background: #152440;
+        color: white;
+        padding: 22px 7%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .brand {
+        font-size: 25px;
+        font-weight: 750;
+        letter-spacing: -1px;
+    }
+
+    .brand span {
+        color: #68a7ff;
+    }
+
+    header small {
+        color: #c6d1e4;
+    }
+
+    main {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 22px;
+    }
+
+    .welcome {
+        margin-bottom: 28px;
+    }
+
+    .welcome h1 {
+        font-size: 30px;
+        margin: 0 0 8px;
+    }
+
+    .welcome p {
+        color: #718096;
+        margin: 0;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .stat-card, .panel {
+        background: white;
+        padding: 24px;
+        border-radius: 15px;
+        border: 1px solid #e5eaf2;
+        box-shadow: 0 5px 20px #1d35570a;
+    }
+
+    .stat-card small {
+        color: #718096;
+        font-size: 13px;
+    }
+
+    .stat-card h2 {
+        margin: 10px 0 0;
+        font-size: 30px;
+    }
+
+    .content {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .panel h2 {
+        margin: 0 0 22px;
+        font-size: 20px;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: 650;
+        margin-bottom: 7px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dce3ed;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 14px;
+        background: #fff;
+        outline: none;
+        margin-bottom: 17px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: #4387f5;
+        box-shadow: 0 0 0 3px #4387f51a;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 75px;
+    }
+
+    button {
+        border: none;
+        border-radius: 8px;
+        padding: 12px 18px;
+        background: #2869df;
+        color: white;
+        font-size: 14px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    button:hover {
+        background: #1b53b9;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
+
+    .application {
+        padding: 15px 0;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .application:last-child {
+        border-bottom: none;
+    }
+
+    .application strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .application small {
+        color: #718096;
+    }
+
+    .status {
+        display: inline-block;
+        margin-top: 9px;
+        padding: 5px 9px;
+        border-radius: 20px;
+        background: #e8f1ff;
+        color: #245db9;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .empty {
+        color: #718096;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 760px) {
+        .content {
+            grid-template-columns: 1fr;
+        }
+
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            padding: 20px;
+        }
+
+        main {
+            margin-top: 28px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">Job<span>Track</span></div>
+    <small>Your career, organized.</small>
+</header>
+
+<main>
+    <section class="welcome">
+        <h1>Application Dashboard 👋</h1>
+        <p>Track your applications. Stay organized. Get closer to your next opportunity.</p>
+    </section>
+
+    <section class="stats">
+        <div class="stat-card">
+            <small>Total Applications</small>
+            <h2 id="totalCount">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <small>Interviews</small>
+            <h2 id="interviewCount">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <small>Offers</small>
+            <h2 id="offerCount">0</h2>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="panel">
+            <h2>＋ Add Application</h2>
+
+            <form id="jobForm">
+                <label for="company">Company Name</label>
+                <input id="company" type="text"
+                       placeholder="e.g. Amazon" required>
+
+                <label for="role">Job Role</label>
+                <input id="role" type="text"
+                       placeholder="e.g. Java Developer" required>
+
+                <label for="status">Application Status</label>
+                <select id="status" required>
+                    <option value="Applied">Applied</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+                <label for="date">Application Date</label>
+                <input id="date" type="date" required>
+
+                <label for="notes">Notes (optional)</label>
+                <textarea id="notes"
+                          placeholder="Recruiter details, next steps..."></textarea>
+
+                <button class="submit-btn" type="submit">
+                    Save Application →
+                </button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Recent Applications</h2>
+            <div id="applicationList">
+                <p class="empty">
+                    No applications yet. Add your first application
+                    using the form to get started!
+                </p>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<script>
+    const jobForm = document.getElementById("jobForm");
+    const applicationList = document.getElementById("applicationList");
+    const applications = [];
+
+    document.getElementById("date").value =
+        new Date().toLocaleDateString("en-CA");
+
+
+    // 1. Send a new application to the backend
+    jobForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const application = {
+            company: document.getElementById("company").value.trim(),
+            role: document.getElementById("role").value.trim(),
+            status: document.getElementById("status").value,
+            date: document.getElementById("date").value,
+            notes: document.getElementById("notes").value.trim()
+        };
+
+        try {
+            const response = await fetch("/api/applications", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(application)
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save application");
+            }
+
+            const savedApplication = await response.json();
+
+            applications.unshift(savedApplication);
+            renderApplications();
+
+            jobForm.reset();
+
+            document.getElementById("date").value =
+                new Date().toLocaleDateString("en-CA");
+
+        } catch (error) {
+            console.error("Error saving application:", error);
+            alert("Could not save application. Please try again.");
+        }
+    });
+
+
+    // 2. Display applications on the dashboard
+    function renderApplications() {
+        applicationList.replaceChildren();
+
+        if (applications.length === 0) {
+            const message = document.createElement("p");
+            message.className = "empty";
+            message.textContent =
+                "No applications yet. Add your first application using the form to get started!";
+            applicationList.append(message);
+        }
+
+        applications.forEach(function(application) {
+            const card = document.createElement("div");
+            card.className = "application";
+
+            const title = document.createElement("strong");
+            title.textContent = application.role;
+
+            const company = document.createElement("small");
+            company.textContent =
+                application.company + " · " + application.date;
+
+            const status = document.createElement("div");
+            status.className = "status";
+            status.textContent = application.status;
+
+            card.append(title, company, status);
+
+            if (application.notes) {
+                const notes = document.createElement("p");
+                notes.className = "empty";
+                notes.textContent = application.notes;
+                card.append(notes);
+            }
+
+            applicationList.append(card);
+        });
+
+        document.getElementById("totalCount").textContent =
+            applications.length;
+
+        document.getElementById("interviewCount").textContent =
+            applications.filter(app => app.status === "Interview").length;
+
+        document.getElementById("offerCount").textContent =
+            applications.filter(app => app.status === "Offer").length;
+    }
+
+
+    // 3. Load saved applications from the backend
+    async function loadApplications() {
+        try {
+            const response = await fetch("/api/applications");
+
+            if (!response.ok) {
+                throw new Error("Failed to load applications");
+            }
+
+            const savedApplications = await response.json();
+
+            applications.splice(
+                0,
+                applications.length,
+                ...savedApplications.reverse()
+            );
+
+            renderApplications();
+
+        } catch (error) {
+            console.error("Error loading applications:", error);
+            alert("Could not load applications from the server.");
+        }
+    }
+
+
+    // 4. Run once when the page opens
+    loadApplications();
+</script>
+</body>
+</html>
