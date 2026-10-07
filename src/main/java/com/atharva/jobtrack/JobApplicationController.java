@@ -24,4 +24,21 @@ public class JobApplicationController {
             @RequestBody JobApplication application) {
         return repository.save(application);
     }
+
+    @PutMapping("/{id}")
+    public JobApplication updateApplication(
+            @PathVariable Long id,
+            @RequestBody JobApplication updatedApplication) {
+
+        JobApplication existingApplication = repository.findById(id)
+                .orElseThrow();
+
+        existingApplication.setCompany(updatedApplication.getCompany());
+        existingApplication.setRole(updatedApplication.getRole());
+        existingApplication.setStatus(updatedApplication.getStatus());
+        existingApplication.setDate(updatedApplication.getDate());
+        existingApplication.setNotes(updatedApplication.getNotes());
+
+        return repository.save(existingApplication);
+    }
 }

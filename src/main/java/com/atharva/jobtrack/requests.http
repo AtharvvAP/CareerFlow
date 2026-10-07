@@ -13,3 +13,15 @@ Content-Type: application/json
 
 ### Get all job applications
 GET http://localhost:8080/api/applications
+
+### Update application
+PUT http://localhost:8080/api/applications/2
+Content-Type: application/json
+
+{
+  "company": "Google",
+  "role": "Java Developer",
+  "status": "Interview",
+  "date": "2026-10-08",
+  "notes": "Updated using PUT API"
+}
