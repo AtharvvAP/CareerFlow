@@ -41,4 +41,9 @@ public class JobApplicationController {
 
         return repository.save(existingApplication);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteApplication(@PathVariable Long id) {
+        repository.deleteById(id);
+    }
 }
