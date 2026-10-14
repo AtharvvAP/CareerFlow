@@ -1,7 +1,9 @@
-
 package com.atharva.jobtrack;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @RestController
@@ -31,7 +33,8 @@ public class JobApplicationController {
             @RequestBody JobApplication updatedApplication) {
 
         JobApplication existingApplication = repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Application not found"));
 
         existingApplication.setCompany(updatedApplication.getCompany());
         existingApplication.setRole(updatedApplication.getRole());
@@ -44,6 +47,12 @@ public class JobApplicationController {
 
     @DeleteMapping("/{id}")
     public void deleteApplication(@PathVariable Long id) {
+
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Application not found");
+        }
+
         repository.deleteById(id);
     }
 }
