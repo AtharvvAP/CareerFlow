@@ -549,11 +549,14 @@
                 <label for="date">Application date</label>
                 <input id="date" type="date" required>
 
+                <label for="nextActionDate">Next follow-up date (optional)</label>
+                <input id="nextActionDate" type="date">
+
+                <label for="interviewDate">Interview date (optional)</label>
+                <input id="interviewDate" type="date">
+
                 <label for="notes">Notes (optional)</label>
-                <textarea
-                        id="notes"
-                        placeholder="Recruiter details, next steps..."
-                ></textarea>
+                <textarea id="notes" placeholder="Recruiter details, next steps..."></textarea>
 
                 <button id="submitBtn" class="submit-btn" type="submit">
                     Save application
@@ -666,6 +669,8 @@
             role: document.getElementById("role").value.trim(),
             status: document.getElementById("status").value,
             date: document.getElementById("date").value,
+            nextActionDate: document.getElementById("nextActionDate").value,
+            interviewDate: document.getElementById("interviewDate").value,
             notes: document.getElementById("notes").value.trim()
         };
 
@@ -966,6 +971,12 @@
 
         document.getElementById("date").value =
             application.date;
+
+        document.getElementById("nextActionDate").value =
+        application.nextActionDate || "";
+
+        document.getElementById("interviewDate").value =
+        application.interviewDate || "";
 
         document.getElementById("notes").value =
             application.notes || "";

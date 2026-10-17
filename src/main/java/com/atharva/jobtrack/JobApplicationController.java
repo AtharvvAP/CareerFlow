@@ -40,6 +40,13 @@ public class JobApplicationController {
         existingApplication.setRole(updatedApplication.getRole());
         existingApplication.setStatus(updatedApplication.getStatus());
         existingApplication.setDate(updatedApplication.getDate());
+
+        existingApplication.setNextActionDate(
+                updatedApplication.getNextActionDate());
+
+        existingApplication.setInterviewDate(
+                updatedApplication.getInterviewDate());
+
         existingApplication.setNotes(updatedApplication.getNotes());
 
         return repository.save(existingApplication);

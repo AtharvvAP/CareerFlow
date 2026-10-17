@@ -1,10 +1,9 @@
-
 package com.atharva.jobtrack;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,6 +19,13 @@ public class JobApplication {
     private String status;
     private String date;
     private String notes;
+
+    // New fields for Feature 2
+    private String nextActionDate;
+    private String interviewDate;
+
+    public JobApplication() {
+    }
 
     public Long getId() {
         return id;
@@ -67,5 +73,21 @@ public class JobApplication {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getNextActionDate() {
+        return nextActionDate;
+    }
+
+    public void setNextActionDate(String nextActionDate) {
+        this.nextActionDate = nextActionDate;
+    }
+
+    public String getInterviewDate() {
+        return interviewDate;
+    }
+
+    public void setInterviewDate(String interviewDate) {
+        this.interviewDate = interviewDate;
     }
 }
