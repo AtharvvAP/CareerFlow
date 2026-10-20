@@ -150,10 +150,7 @@
         }
 
         .content {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 24px;
-            align-items: start;
+            display: block;
         }
 
         .panel {
@@ -164,15 +161,97 @@
         }
 
         .form-panel {
-            position: sticky;
-            top: 24px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(460px, 100%);
+            height: 100vh;
+            height: 100dvh;
+            overflow-y: auto;
+            z-index: 1001;
+
+            border: none;
+            border-radius: 0;
+            padding: 28px;
+
+            transform: translateX(100%);
+            visibility: hidden;
+            transition: transform 0.25s ease, visibility 0.25s ease;
+
+            box-shadow: -12px 0 40px rgba(16, 24, 40, 0.12);
         }
 
-        .panel h2 {
-            margin: 0 0 20px;
-            font-size: 18px;
+        .form-panel.open {
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        .drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(16, 24, 40, 0.45);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        .drawer-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .drawer-header h2 {
+            margin: 0;
+        }
+
+        .close-drawer-btn {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: white;
+            color: var(--ink);
+            font-size: 24px;
+        }
+
+        .close-drawer-btn:hover {
+            background: var(--page);
+        }
+
+        /* Dashboard toolbar */
+        .dashboard-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .dashboard-toolbar h2 {
+            margin: 0;
+            font-size: 20px;
             font-weight: 800;
-            letter-spacing: -0.3px;
+        }
+
+        .dashboard-toolbar p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .dashboard-toolbar .submit-btn {
+            width: auto;
+            flex-shrink: 0;
         }
 
         /* Form controls */
@@ -409,7 +488,7 @@
             transform: translateY(-10px);
             pointer-events: none;
             transition: opacity 0.3s, transform 0.3s;
-            z-index: 1000;
+            z-index: 1002;
         }
 
         #toast.show {
@@ -428,11 +507,7 @@
         /* Responsive design */
         @media (max-width: 860px) {
             .content {
-                grid-template-columns: 1fr;
-            }
-
-            .form-panel {
-                position: static;
+                display: block;
             }
         }
 
@@ -456,11 +531,21 @@
             .panel {
                 padding: 20px;
             }
+
+            .form-panel {
+                padding: 20px;
+            }
+
+            .dashboard-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            * {
-                transition: none !important;
+            .form-panel,
+            .drawer-backdrop {
+                transition: none;
             }
         }
     </style>
@@ -513,12 +598,50 @@
 
     </section>
 
+    <section class="dashboard-toolbar">
+        <div>
+            <h2>Recent applications</h2>
+            <p>Track your applications and keep your job search organized.</p>
+        </div>
+
+        <button
+                type="button"
+                id="openFormBtn"
+                class="submit-btn"
+        >
+            + Add Application
+        </button>
+    </section>
+
     <section class="content">
 
-        <!-- Add/Edit form -->
-        <div class="panel form-panel">
+        <!-- Drawer backdrop -->
+        <div
+                id="drawerBackdrop"
+                class="drawer-backdrop"
+        ></div>
 
-            <h2>Add application</h2>
+        <!-- Add/Edit application drawer -->
+        <div
+                id="applicationDrawer"
+                class="panel form-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="drawerTitle"
+                aria-hidden="true"
+        >
+            <div class="drawer-header">
+                <h2 id="drawerTitle">Add application</h2>
+
+                <button
+                        type="button"
+                        id="closeDrawerBtn"
+                        class="close-drawer-btn"
+                        aria-label="Close form"
+                >
+                    &times;
+                </button>
+            </div>
 
             <form id="jobForm">
 
@@ -547,18 +670,39 @@
                 </select>
 
                 <label for="date">Application date</label>
-                <input id="date" type="date" required>
+                <input
+                        id="date"
+                        type="date"
+                        required
+                >
 
-                <label for="nextActionDate">Next follow-up date (optional)</label>
-                <input id="nextActionDate" type="date">
+                <label for="nextActionDate">
+                    Next follow-up date (optional)
+                </label>
+                <input
+                        id="nextActionDate"
+                        type="date"
+                >
 
-                <label for="interviewDate">Interview date (optional)</label>
-                <input id="interviewDate" type="date">
+                <label for="interviewDate">
+                    Interview date (optional)
+                </label>
+                <input
+                        id="interviewDate"
+                        type="date"
+                >
 
                 <label for="notes">Notes (optional)</label>
-                <textarea id="notes" placeholder="Recruiter details, next steps..."></textarea>
+                <textarea
+                        id="notes"
+                        placeholder="Recruiter details, next steps..."
+                ></textarea>
 
-                <button id="submitBtn" class="submit-btn" type="submit">
+                <button
+                        id="submitBtn"
+                        class="submit-btn"
+                        type="submit"
+                >
                     Save application
                 </button>
 
@@ -572,13 +716,12 @@
                 </button>
 
             </form>
-
         </div>
 
-        <!-- Search, filter and application list -->
+        <!-- Application list -->
         <div class="panel">
 
-            <h2>Recent applications</h2>
+            <h2>Applications</h2>
 
             <input
                     type="search"
@@ -596,7 +739,7 @@
 
             <div id="applicationList">
                 <p class="empty">
-                    No applications yet. Fill in the form to add your first one.
+                    No applications yet. Click Add Application to add your first one.
                 </p>
             </div>
 
@@ -610,6 +753,54 @@
     const jobForm = document.getElementById("jobForm");
     const applicationList = document.getElementById("applicationList");
     const applications = [];
+
+        // Drawer elements
+    const applicationDrawer = document.getElementById("applicationDrawer");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const openFormBtn = document.getElementById("openFormBtn");
+    const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+
+    // Open the drawer
+    function openDrawer() {
+        applicationDrawer.classList.add("open");
+        drawerBackdrop.classList.add("open");
+
+        applicationDrawer.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        document.getElementById("company").focus();
+    }
+
+    // Close the drawer
+    function closeDrawer() {
+        applicationDrawer.classList.remove("open");
+        drawerBackdrop.classList.remove("open");
+
+        applicationDrawer.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    // Add Application button
+    openFormBtn.addEventListener("click", function() {
+        resetFormMode();
+        openDrawer();
+    });
+
+    // Close button
+    closeDrawerBtn.addEventListener("click", closeDrawer);
+
+    // Close when clicking outside the drawer
+    drawerBackdrop.addEventListener("click", closeDrawer);
+
+    // Close with Escape key
+    document.addEventListener("keydown", function(event) {
+        if (
+            event.key === "Escape" &&
+            applicationDrawer.classList.contains("open")
+        ) {
+            closeDrawer();
+        }
+    });
 
     // null = add mode; an id = edit mode
     let editingId = null;
@@ -987,9 +1178,10 @@
         document.getElementById("cancelBtn").style.display =
             "block";
 
-        jobForm.scrollIntoView({
-            behavior: "smooth"
-        });
+        document.getElementById("drawerTitle").textContent =
+        "Edit application";
+
+        openDrawer();
     }
 
     // Reset the form back to add mode
@@ -1006,6 +1198,11 @@
 
         document.getElementById("cancelBtn").style.display =
             "none";
+
+        document.getElementById("drawerTitle").textContent =
+            "Add application";
+
+        closeDrawer();
     }
 
     document.getElementById("cancelBtn")
