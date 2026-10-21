@@ -396,6 +396,52 @@
             font-size: 13px;
         }
 
+        /* Follow-up and interview dates */
+        .app-extra-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .app-date-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .follow-up-tag {
+            background: #e3f3f1;
+            color: #0b5a54;
+        }
+
+        .interview-date-tag {
+            background: #fdf1d8;
+            color: #9a5b00;
+        }
+
+        .app-date-tag svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 560px) {
+            .app-extra-dates {
+                gap: 6px;
+            }
+
+            .app-date-tag {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+        }
+
+
         .status {
             padding: 4px 10px;
             border-radius: 999px;
@@ -1001,8 +1047,36 @@
             date.className = "app-date";
             date.textContent = formatDate(application.date);
 
+
             meta.append(status, date);
             info.append(title, company, meta);
+
+            // Additional follow-up and interview dates
+            const extraDates = document.createElement("div");
+            extraDates.className = "app-extra-dates";
+
+            if (application.nextActionDate) {
+                const followUp = document.createElement("span");
+                followUp.className = "app-date-tag follow-up-tag";
+                followUp.textContent =
+                    "↗ Follow-up: " + formatDate(application.nextActionDate);
+
+                extraDates.append(followUp);
+            }
+
+            if (application.interviewDate) {
+                const interview = document.createElement("span");
+                interview.className = "app-date-tag interview-date-tag";
+                interview.textContent =
+                    "▣ Interview: " + formatDate(application.interviewDate);
+
+                extraDates.append(interview);
+            }
+
+            if (extraDates.childElementCount > 0) {
+                info.append(extraDates);
+            }
+
 
             if (application.notes) {
                 const notes = document.createElement("p");
