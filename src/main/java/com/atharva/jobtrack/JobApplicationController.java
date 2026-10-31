@@ -49,6 +49,12 @@ public class JobApplicationController {
 
         existingApplication.setNotes(updatedApplication.getNotes());
 
+        existingApplication.setJobLink(updatedApplication.getJobLink());
+
+        existingApplication.setLocation(updatedApplication.getLocation());
+
+        existingApplication.setSource(updatedApplication.getSource());
+
         return repository.save(existingApplication);
     }
 

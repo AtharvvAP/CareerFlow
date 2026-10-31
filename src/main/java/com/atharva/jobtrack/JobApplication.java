@@ -24,6 +24,11 @@ public class JobApplication {
     private String nextActionDate;
     private String interviewDate;
 
+    // New fields for Feature 3
+    private String jobLink;
+    private String location;
+    private String source;
+
     public JobApplication() {
     }
 
@@ -89,5 +94,29 @@ public class JobApplication {
 
     public void setInterviewDate(String interviewDate) {
         this.interviewDate = interviewDate;
+    }
+
+    public String getJobLink() {
+        return jobLink;
+    }
+
+    public void setJobLink(String jobLink) {
+        this.jobLink = jobLink;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }
