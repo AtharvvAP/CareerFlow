@@ -443,6 +443,42 @@
             box-shadow: 0 0 0 3px #5b5ce21a;
         }
 
+        /* Action Center */
+        .action-center { margin-bottom: 29px; }
+
+        .action-list { padding: 8px 25px 14px; }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .action-row:last-child { border-bottom: 0; }
+        .action-row strong { display: block; font-size: 13px; }
+        .action-row span { color: var(--muted); font-size: 12px; }
+
+        .action-row .action-due {
+            padding: 5px 9px;
+            border-radius: 7px;
+            background: var(--red-bg);
+            color: var(--red);
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .action-empty {
+            margin: 0;
+            padding: 18px 0;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
         /* Application cards */
         #applicationList { padding: 0 25px; }
 
@@ -944,6 +980,18 @@
 
             </section>
 
+            <!-- ACTION CENTER -->
+            <section class="panel action-center">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Action Center</h2>
+                        <p>Follow-ups that need your attention.</p>
+                    </div>
+                    <span class="count-label" id="actionCount">0 overdue</span>
+                </div>
+                <div class="action-list" id="actionList"></div>
+            </section>
+
             <!-- APPLICATIONS PANEL -->
             <section class="panel applications-panel" id="applicationsPanel">
 
@@ -1212,6 +1260,82 @@
         const m = String(d.getMonth() + 1).padStart(2, "0");
         const day = String(d.getDate()).padStart(2, "0");
         return `${d.getFullYear()}-${m}-${day}`;
+    }
+
+    // Date n days from today as YYYY-MM-DD
+    function addDaysISO(days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${d.getFullYear()}-${m}-${day}`;
+    }
+
+    // Label one date: overdue, today, soon (next 7 days) or later
+    function getBucket(dateText) {
+        const today = todayISO();
+
+        if (dateText < today) {
+            return "overdue";
+        }
+
+        if (dateText === today) {
+            return "today";
+        }
+
+        if (dateText <= addDaysISO(7)) {
+            return "soon";
+        }
+
+        return "later";
+    }
+
+    // Active applications whose follow-up date has passed
+    function getOverdueFollowUps() {
+        return applications.filter(function(app) {
+            return app.nextActionDate
+                && getBucket(app.nextActionDate) === "overdue"
+                && app.status !== "Rejected"
+                && app.status !== "Offer";
+        });
+    }
+
+    // Fill the Action Center box on the dashboard
+    function renderActionCenter() {
+        const list = document.getElementById("actionList");
+        const overdue = getOverdueFollowUps();
+
+        list.replaceChildren();
+        document.getElementById("actionCount").textContent =
+            overdue.length + " overdue";
+
+        if (overdue.length === 0) {
+            const message = document.createElement("p");
+            message.className = "action-empty";
+            message.textContent = "You're all caught up. No overdue follow-ups!";
+            list.append(message);
+            return;
+        }
+
+        // Show at most 5 rows to save space
+        overdue.slice(0, 5).forEach(function(app) {
+            const row = document.createElement("div");
+            row.className = "action-row";
+
+            const info = document.createElement("div");
+            const name = document.createElement("strong");
+            name.textContent = app.company;
+            const role = document.createElement("span");
+            role.textContent = app.role;
+            info.append(name, role);
+
+            const due = document.createElement("span");
+            due.className = "action-due";
+            due.textContent = "Follow-up: " + formatDate(app.nextActionDate);
+
+            row.append(info, due);
+            list.append(row);
+        });
     }
 
     document.getElementById("date").value = todayISO();
@@ -1560,6 +1684,8 @@
             applications.length === 1
                 ? "1 application"
                 : applications.length + " applications";
+
+        renderActionCenter();
     }
 
     // Important: update results when the search/filter changes
