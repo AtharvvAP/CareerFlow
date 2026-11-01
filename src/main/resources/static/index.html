@@ -535,6 +535,25 @@
         .follow-up-tag { background: #e9f7f3; color: #13795b; }
         .interview-date-tag { background: #fff3dd; color: #996000; }
 
+        .app-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .app-tag {
+            padding: 6px 9px;
+            border-radius: 7px;
+            background: #f0f1ff;
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .app-tag.link-tag:hover { background: #e2e3ff; }
+
         .app-notes {
             margin: 10px 0 0;
             padding-left: 11px;
@@ -1038,6 +1057,38 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label for="jobLink">Job link</label>
+            <input
+                    type="url"
+                    id="jobLink"
+                    name="jobLink"
+                    placeholder="https://..."
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="e.g. Pune, Remote"
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="source">Source</label>
+            <select id="source" name="source">
+                <option value="">Select source</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Naukri">Naukri</option>
+                <option value="Internshala">Internshala</option>
+                <option value="Foundit">Foundit</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
         <div class="form-section-title">IMPORTANT DATES</div>
 
         <div class="form-group">
@@ -1220,7 +1271,10 @@
             // Empty date inputs are sent as null instead of ""
             nextActionDate: document.getElementById("nextActionDate").value || null,
             interviewDate: document.getElementById("interviewDate").value || null,
-            notes: document.getElementById("notes").value.trim()
+            notes: document.getElementById("notes").value.trim(),
+            jobLink: document.getElementById("jobLink").value.trim() || null,
+            location: document.getElementById("location").value.trim() || null,
+            source: document.getElementById("source").value || null
         };
 
         try {
@@ -1384,6 +1438,39 @@
 
             meta.append(status, date);
             info.append(title, company, meta);
+
+            // Location, source and job link tags
+            const tags = document.createElement("div");
+            tags.className = "app-tags";
+
+            if (application.location) {
+                const locationTag = document.createElement("span");
+                locationTag.className = "app-tag";
+                locationTag.textContent = "📍 " + application.location;
+                tags.append(locationTag);
+            }
+
+            if (application.source) {
+                const sourceTag = document.createElement("span");
+                sourceTag.className = "app-tag";
+                sourceTag.textContent = "via " + application.source;
+                tags.append(sourceTag);
+            }
+
+            // Only make http(s) links clickable (blocks javascript: URLs)
+            if (application.jobLink && /^https?:\/\//i.test(application.jobLink)) {
+                const linkTag = document.createElement("a");
+                linkTag.className = "app-tag link-tag";
+                linkTag.href = application.jobLink;
+                linkTag.target = "_blank";
+                linkTag.rel = "noopener noreferrer";
+                linkTag.textContent = "↗ Job posting";
+                tags.append(linkTag);
+            }
+
+            if (tags.childElementCount > 0) {
+                info.append(tags);
+            }
 
             // Additional follow-up and interview dates
             const extraDates = document.createElement("div");
@@ -1597,6 +1684,15 @@
 
         document.getElementById("notes").value =
             application.notes || "";
+
+        document.getElementById("jobLink").value =
+            application.jobLink || "";
+
+        document.getElementById("location").value =
+            application.location || "";
+
+        document.getElementById("source").value =
+            application.source || "";
 
         document.getElementById("submitBtn").textContent =
             "Update application";
