@@ -55,6 +55,10 @@ public class JobApplicationController {
 
         existingApplication.setSource(updatedApplication.getSource());
 
+        if (updatedApplication.getFollowUpDone() != null) {
+            existingApplication.setFollowUpDone(updatedApplication.getFollowUpDone());
+        }
+
         return repository.save(existingApplication);
     }
 

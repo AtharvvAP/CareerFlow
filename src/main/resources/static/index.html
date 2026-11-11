@@ -471,6 +471,41 @@
             white-space: nowrap;
         }
 
+        .action-row .action-due.today {
+            background: var(--blue-bg);
+            color: var(--blue);
+        }
+
+        .action-row .action-due.interview {
+            background: var(--amber-bg);
+            color: var(--amber);
+        }
+
+        .action-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-done-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: white;
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .action-done-btn:hover { background: var(--green-bg); }
+
+        .action-more {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
         .action-empty {
             margin: 0;
             padding: 18px 0;
@@ -1295,47 +1330,164 @@
         return applications.filter(function(app) {
             return app.nextActionDate
                 && getBucket(app.nextActionDate) === "overdue"
+                && !app.followUpDone
                 && app.status !== "Rejected"
                 && app.status !== "Offer";
         });
     }
 
+    // Active applications whose follow-up is due today
+    function getTodayFollowUps() {
+        return applications.filter(function(app) {
+            return app.nextActionDate
+                && getBucket(app.nextActionDate) === "today"
+                && !app.followUpDone
+                && app.status !== "Rejected"
+                && app.status !== "Offer";
+        });
+    }
+
+    // Active applications with an interview today or in the next 7 days
+    function getUpcomingInterviews() {
+        return applications.filter(function(app) {
+            return app.interviewDate
+                && (getBucket(app.interviewDate) === "today"
+                    || getBucket(app.interviewDate) === "soon")
+                && app.status !== "Rejected"
+                && app.status !== "Offer";
+        });
+    }
+
+    // Save "follow-up done" for one application (PUT replaces the record, so send all fields)
+    async function markFollowUpDone(app) {
+        try {
+            const response = await fetch(`/api/applications/${app.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ...app, followUpDone: true })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to mark follow-up as done");
+            }
+
+            const saved = await response.json();
+            const index = applications.findIndex(a => a.id === app.id);
+
+            if (index !== -1) {
+                applications[index] = saved;
+            }
+
+            renderApplications();
+            showToast("Follow-up marked as done!", "success");
+
+        } catch (error) {
+            console.error("Error marking follow-up done:", error);
+            showToast(error.message || "Could not update. Please try again.", "error");
+        }
+    }
+
     // Fill the Action Center box on the dashboard
     function renderActionCenter() {
         const list = document.getElementById("actionList");
-        const overdue = getOverdueFollowUps();
+
+        // Oldest date first = most urgent first
+        const overdue = getOverdueFollowUps().sort(function(a, b) {
+            return a.nextActionDate.localeCompare(b.nextActionDate);
+        });
+
+        const dueToday = getTodayFollowUps();
+
+        const interviews = getUpcomingInterviews().sort(function(a, b) {
+            return a.interviewDate.localeCompare(b.interviewDate);
+        });
+
+        // One combined list, in priority order
+        const items = [];
+
+        overdue.forEach(function(app) {
+            items.push({
+                app: app,
+                text: "Overdue: " + formatDate(app.nextActionDate),
+                cls: "",
+                canDone: true
+            });
+        });
+
+        dueToday.forEach(function(app) {
+            items.push({
+                app: app,
+                text: "Follow-up today",
+                cls: " today",
+                canDone: true
+            });
+        });
+
+        interviews.forEach(function(app) {
+            items.push({
+                app: app,
+                text: "Interview: " + formatDate(app.interviewDate),
+                cls: " interview"
+            });
+        });
 
         list.replaceChildren();
         document.getElementById("actionCount").textContent =
-            overdue.length + " overdue";
+            items.length + " to do";
 
-        if (overdue.length === 0) {
+        if (items.length === 0) {
             const message = document.createElement("p");
             message.className = "action-empty";
-            message.textContent = "You're all caught up. No overdue follow-ups!";
+            message.textContent = "You're all caught up. Nothing needs action!";
             list.append(message);
             return;
         }
 
-        // Show at most 5 rows to save space
-        overdue.slice(0, 5).forEach(function(app) {
+        // Show at most 6 rows to save space
+        const MAX_ROWS = 6;
+
+        items.slice(0, MAX_ROWS).forEach(function(item) {
             const row = document.createElement("div");
             row.className = "action-row";
 
             const info = document.createElement("div");
             const name = document.createElement("strong");
-            name.textContent = app.company;
+            name.textContent = item.app.company;
             const role = document.createElement("span");
-            role.textContent = app.role;
+            role.textContent = item.app.role;
             info.append(name, role);
 
-            const due = document.createElement("span");
-            due.className = "action-due";
-            due.textContent = "Follow-up: " + formatDate(app.nextActionDate);
+            const tag = document.createElement("span");
+            tag.className = "action-due" + item.cls;
+            tag.textContent = item.text;
 
-            row.append(info, due);
+            const right = document.createElement("div");
+            right.className = "action-right";
+            right.append(tag);
+
+            if (item.canDone) {
+                const doneBtn = document.createElement("button");
+                doneBtn.type = "button";
+                doneBtn.className = "action-done-btn";
+                doneBtn.textContent = "✓ Done";
+                doneBtn.addEventListener("click", function() {
+                    markFollowUpDone(item.app);
+                });
+                right.append(doneBtn);
+            }
+
+            row.append(info, right);
             list.append(row);
         });
+
+        if (items.length > MAX_ROWS) {
+            const more = document.createElement("p");
+            more.className = "action-more";
+            more.textContent = "+ " + (items.length - MAX_ROWS) + " more";
+            list.append(more);
+        }
     }
 
     document.getElementById("date").value = todayISO();
@@ -1387,6 +1539,14 @@
     jobForm.addEventListener("submit", async function(event) {
         event.preventDefault();
 
+        // The application being edited (null when adding a new one)
+        const editingApp = editingId !== null
+            ? applications.find(app => app.id === editingId)
+            : null;
+
+        const newFollowUpDate =
+            document.getElementById("nextActionDate").value || null;
+
         const application = {
             company: document.getElementById("company").value.trim(),
             role: document.getElementById("role").value.trim(),
@@ -1398,7 +1558,14 @@
             notes: document.getElementById("notes").value.trim(),
             jobLink: document.getElementById("jobLink").value.trim() || null,
             location: document.getElementById("location").value.trim() || null,
-            source: document.getElementById("source").value || null
+            source: document.getElementById("source").value || null,
+            // New application: not done. Edit: keep old value,
+            // but a new follow-up date means a new follow-up is pending.
+            followUpDone: editingApp
+                ? ((editingApp.nextActionDate || null) !== newFollowUpDate
+                    ? false
+                    : (editingApp.followUpDone ?? null))
+                : false
         };
 
         try {

@@ -29,6 +29,8 @@ public class JobApplication {
     private String location;
     private String source;
 
+    private Boolean followUpDone;
+
     public JobApplication() {
     }
 
@@ -118,5 +120,13 @@ public class JobApplication {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public Boolean getFollowUpDone(){
+        return followUpDone;
+    }
+
+    public void setFollowUpDone(Boolean followUpDone){
+        this.followUpDone=followUpDone;
     }
 }
