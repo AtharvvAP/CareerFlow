@@ -1,75 +1,39 @@
+
 package com.atharva.jobtrack;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/applications")
 public class JobApplicationController {
 
-    private final JobApplicationRepository repository;
+    private final JobApplicationService service;
 
-    public JobApplicationController(JobApplicationRepository repository) {
-        this.repository = repository;
+    public JobApplicationController(JobApplicationService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<JobApplication> getApplications() {
-        return repository.findAll();
+        return service.getAllApplications();
     }
 
     @PostMapping
     public JobApplication addApplication(
             @RequestBody JobApplication application) {
-        return repository.save(application);
+        return service.addApplication(application);
     }
 
     @PutMapping("/{id}")
     public JobApplication updateApplication(
             @PathVariable Long id,
             @RequestBody JobApplication updatedApplication) {
-
-        JobApplication existingApplication = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Application not found"));
-
-        existingApplication.setCompany(updatedApplication.getCompany());
-        existingApplication.setRole(updatedApplication.getRole());
-        existingApplication.setStatus(updatedApplication.getStatus());
-        existingApplication.setDate(updatedApplication.getDate());
-
-        existingApplication.setNextActionDate(
-                updatedApplication.getNextActionDate());
-
-        existingApplication.setInterviewDate(
-                updatedApplication.getInterviewDate());
-
-        existingApplication.setNotes(updatedApplication.getNotes());
-
-        existingApplication.setJobLink(updatedApplication.getJobLink());
-
-        existingApplication.setLocation(updatedApplication.getLocation());
-
-        existingApplication.setSource(updatedApplication.getSource());
-
-        if (updatedApplication.getFollowUpDone() != null) {
-            existingApplication.setFollowUpDone(updatedApplication.getFollowUpDone());
-        }
-
-        return repository.save(existingApplication);
+        return service.updateApplication(id, updatedApplication);
     }
 
     @DeleteMapping("/{id}")
     public void deleteApplication(@PathVariable Long id) {
-
-        if (!repository.existsById(id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Application not found");
-        }
-
-        repository.deleteById(id);
+        service.deleteApplication(id);
     }
 }
