@@ -3,6 +3,7 @@ package com.atharva.jobtrack;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -21,14 +22,14 @@ public class JobApplicationController {
 
     @PostMapping
     public JobApplication addApplication(
-            @RequestBody JobApplication application) {
+            @Valid @RequestBody JobApplication application) {
         return service.addApplication(application);
     }
 
     @PutMapping("/{id}")
     public JobApplication updateApplication(
             @PathVariable Long id,
-            @RequestBody JobApplication updatedApplication) {
+            @Valid @RequestBody JobApplication updatedApplication) {
         return service.updateApplication(id, updatedApplication);
     }
 

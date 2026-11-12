@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "job_applications")
@@ -14,9 +16,17 @@ public class JobApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Company is required")
     private String company;
+
+    @NotBlank(message = "Role is required")
     private String role;
+
+    @Pattern(regexp = "Applied|Interview|Offer|Rejected",
+            message = "Status must be Applied, Interview, Offer or Rejected")
     private String status;
+
+    @NotBlank(message = "Application date is required")
     private String date;
     private String notes;
 
